@@ -9,7 +9,6 @@ const RootLayout = () => {
                     <img src="/logo.png" alt="" />
                     <span>ChartAI</span>
                 </Link>
-                <div className="user">User</div>
             </header>
             <main>
                 <Outlet />
