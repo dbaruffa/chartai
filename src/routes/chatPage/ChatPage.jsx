@@ -16,9 +16,14 @@ const ChatPage = () => {
                 <div className="chat">
                     {
                         chat?.history?.map((entry, i) =>
+                            <>
+                            {entry.img && (
+                                <img src={entry.imgPath} alt="" id="image" />
+                            )}
                             <div className={entry.role === "user"? "message user" : "message"} key={i.toString()}>
                                 <Markdown>{entry.text}</Markdown>
                             </div>
+                            </>
                         )
                     }
                     <NewPrompt />

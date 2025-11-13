@@ -18,7 +18,7 @@ const DashboardPage = () => {
                         {
                             role: "user",
                             text: text,
-                            img: null,
+                            imgPath: null,
                             timestamp: Date.now()
                         }
                     ]
