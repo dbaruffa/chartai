@@ -1,13 +1,21 @@
 import './dashboardPage.css'
+import { useOutletContext } from "react-router-dom";
 
 const DashboardPage = () => {
-    const handleSubmit = async (e) => {
+    const [setChatList] = useOutletContext();
+
+    const createNewChat = async (e) => {
         e.preventDefault();
         const text = e.target.text.value;
-        const userId = "the_one_and_only_user";
         
         if(text) {
-            // TODO: create new chat
+            setChatList((current) => {
+                return [...current, {
+                    id: crypto.randomUUID(),
+                    title: text.substr(0, 40),
+                    created: Date.now()
+                }];
+            });
         }
     }
 
@@ -25,7 +33,7 @@ const DashboardPage = () => {
                 </div>
             </div>
             <div className='formContainer'>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={createNewChat}>
                     <input type='text' name="text" placeholder='Ask me anything...'></input>
                     <button>
                         <img src="/arrow.png" alt="" />

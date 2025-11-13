@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import './chatList.css'
 
-const ChatList = () => {
+const ChatList = ({chatList}) => {
     return (
         <div className='chatList'>
             <span className='title'>DASHBOARD</span>
@@ -9,8 +9,7 @@ const ChatList = () => {
             <hr />
             <span className='title'>RECENT CHATS</span>
             <div className='list'>
-                <Link to="/">Chat 1</Link>
-                <Link to="/">Chat 2</Link>
+                {chatList?.map((chat) => (<Link to={`/dashboard/chats/${chat.id}`} key={chat.id}>{chat.title}</Link>))}
             </div>
         </div>
     )
