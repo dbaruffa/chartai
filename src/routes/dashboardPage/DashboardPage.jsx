@@ -2,7 +2,7 @@ import './dashboardPage.css'
 import { useOutletContext } from "react-router-dom";
 
 const DashboardPage = () => {
-    const [setChatList] = useOutletContext();
+    const [_, setChatList] = useOutletContext();
 
     const createNewChat = async (e) => {
         e.preventDefault();
@@ -13,7 +13,15 @@ const DashboardPage = () => {
                 return [...current, {
                     id: crypto.randomUUID(),
                     title: text.substr(0, 40),
-                    created: Date.now()
+                    created: Date.now(),
+                    history: [
+                        {
+                            role: "user",
+                            text: text,
+                            img: null,
+                            timestamp: Date.now()
+                        }
+                    ]
                 }];
             });
         }

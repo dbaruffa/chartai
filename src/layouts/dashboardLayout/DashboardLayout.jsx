@@ -10,7 +10,7 @@ const DashboardLayout = () => {
         <div className='dashboardLayout'>
             <div className="menu"><ChatList chatList={chatList} /></div>
             <div className="content">
-                <Outlet context={[setChatList]} />
+                <Outlet context={[chatList, setChatList]} />
             </div>
         </div>
     )
