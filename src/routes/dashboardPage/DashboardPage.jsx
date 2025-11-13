@@ -1,17 +1,21 @@
 import './dashboardPage.css'
 import { useOutletContext } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const DashboardPage = () => {
     const [_, setChatList] = useOutletContext();
+    const navigate = useNavigate();
 
     const createNewChat = async (e) => {
         e.preventDefault();
         const text = e.target.text.value;
         
         if(text) {
+            const newChatId = crypto.randomUUID();
+
             setChatList((current) => {
                 return [...current, {
-                    id: crypto.randomUUID(),
+                    id: newChatId,
                     title: text.substr(0, 40),
                     created: Date.now(),
                     history: [
@@ -24,6 +28,8 @@ const DashboardPage = () => {
                     ]
                 }];
             });
+            
+            navigate(`/dashboard/chats/${newChatId}`);
         }
     }
 
