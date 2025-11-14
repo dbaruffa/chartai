@@ -9,8 +9,8 @@ import { useLocation } from 'react-router-dom';
 const NewPrompt = ({chatList, setChatList}) => {
     const [query, setQuery] = useState("");
     const [answer, setAnswer] = useState("");
-    const [localFile, setLocalFile] = useState("");
-    const [aiFile, setAiFile] = useState("");
+    const [localFile, setLocalFile] = useState();
+    const [aiFile, setAiFile] = useState();
 
     const path = useLocation().pathname;
     const chatId = path.split("/").pop();
@@ -53,8 +53,17 @@ const NewPrompt = ({chatList, setChatList}) => {
             let answerText = "";
 
             try {
+                let message = query;
+
+                if(aiFile) {
+                    message = createUserContent([
+                        createPartFromUri(aiFile.uri, aiFile.mimeType),
+                        query,
+                    ]);
+                }
+
                 const response = await aiChat.sendMessageStream({
-                    message: query,
+                    message: message,
                     //config:
                 });
 
@@ -77,7 +86,7 @@ const NewPrompt = ({chatList, setChatList}) => {
                             {
                                 role: "user",
                                 text: query || "",
-                                imgPath: aiFile,
+                                imgPath: localFile,
                                 timestamp: Date.now()
                             },
                             {
@@ -107,37 +116,6 @@ const NewPrompt = ({chatList, setChatList}) => {
 
     useEffect(() => { handleQuery(); }, [query]);
 
-    const handleLocalFile = async () => {
-        if(localFile) {
-            const myfile = await ai.files.upload({
-                file: localFile,
-                config: { mimeType: localFile.type },
-            });
-
-            setAiFile(myfile);
-        }
-    }
-
-    useEffect(() => { handleLocalFile(); }, [localFile]);
-
-    const handleAiFile = async () => {
-        if(aiFile) {
-            console.log("Asking model to describe file ", aiFile.name);
-
-            const response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
-                contents: createUserContent([
-                    createPartFromUri(aiFile.uri, aiFile.mimeType),
-                    "Write one sentence about this file.",
-                ]),
-            });
-
-            setAnswer(response.text);
-        }
-    };
-
-    useEffect(() => { handleAiFile(); }, [aiFile]);
-
     const onTextInput = async (e) => {
         e.preventDefault();
         const text = e.target.text.value;
@@ -150,15 +128,23 @@ const NewPrompt = ({chatList, setChatList}) => {
     const onFileInput = async (e) => {
         e.preventDefault();
         const file = e.target.files[0];
-
+        
         if(file) {
-            setLocalFile(file);
+            const fileUrl = URL.createObjectURL(file);
+            setLocalFile(fileUrl);
+
+            const myfile = await ai.files.upload({
+                file: file,
+                config: { mimeType: file.type },
+            });
+
+            setAiFile(myfile);
         }
     };
 
     return (
         <>
-            {localFile && (<img src={URL.createObjectURL(localFile)} alt="" id="image" />)}
+            {localFile && (<img src={localFile} alt="" id="image" />)}
             {query && <div className='message user'>{query}</div>}
             {answer && <div className='message'><Markdown>{answer}</Markdown></div>}
 

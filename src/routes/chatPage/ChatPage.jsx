@@ -26,7 +26,7 @@ const ChatPage = () => {
                     {
                         chat?.history?.map((entry, i) =>
                             <>
-                            {entry.img && (
+                            {entry.imgPath && (
                                 <img src={entry.imgPath} alt="" id="image" />
                             )}
                             <div className={entry.role === "user"? "message user" : "message"} key={i.toString()}>
