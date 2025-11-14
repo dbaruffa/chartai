@@ -1,14 +1,23 @@
 import './chatPage.css'
 import NewPrompt from '../../components/newPrompt/NewPrompt'
-import { useOutletContext } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Markdown from 'react-markdown';
+import { useEffect } from 'react';
 
 const ChatPage = () => {
     const [chatList, setChatList] = useOutletContext();
     const path = useLocation().pathname;
     const chatId = path.split("/").pop();
     const chat = chatList.find(chat => chat.id === chatId);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if(!chat) {
+            navigate("/dashboard");
+        }
+    }, [chat]);
 
     return (
         <div className='chatPage'>
