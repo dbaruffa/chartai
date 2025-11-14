@@ -15,7 +15,8 @@ const NewPrompt = ({chatList, setChatList}) => {
     const path = useLocation().pathname;
     const chatId = path.split("/").pop();
 
-    const endRef = useRef(null)
+    const endRef = useRef(null);
+    const formRef = useRef(null);
 
     const aiChat = ai.chats.create({
         model: "gemini-2.5-flash",
@@ -123,6 +124,8 @@ const NewPrompt = ({chatList, setChatList}) => {
         if(text) {
             setQuery(text);
         }
+
+        formRef?.current?.reset();
     };
 
     const onFileInput = async (e) => {
@@ -150,7 +153,7 @@ const NewPrompt = ({chatList, setChatList}) => {
 
             <div className='endChat' ref={endRef}></div>
             
-            <form className='newForm' onSubmit={onTextInput}>
+            <form className='newForm' onSubmit={onTextInput} ref={formRef}>
                 <label htmlFor="file">
                     <img src="/attachment.png" alt=""></img>
                 </label>
