@@ -50,16 +50,21 @@ const NewPrompt = ({chatList, setChatList}) => {
 
     const handleQuery = async () => {
         if(query && query.length > 0) {
-            const response = await aiChat.sendMessageStream({
-                message: query,
-                //config:
-            });
-            
             let answerText = "";
 
-            for await (const chunk of response) {
-                answerText += chunk.text;
-                setAnswer(answerText);
+            try {
+                const response = await aiChat.sendMessageStream({
+                    message: query,
+                    //config:
+                });
+
+                for await (const chunk of response) {
+                    answerText += chunk.text;
+                    setAnswer(answerText);
+                }
+            }
+            catch(err) {
+                answerText = "Failed to query model:\n" + err.toString();
             }
 
             // Full answer is here. Insert query and answer (and image) into chat history.
