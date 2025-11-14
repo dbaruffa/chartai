@@ -74,7 +74,25 @@ const NewPrompt = ({chatList, setChatList}) => {
                 }
             }
             catch(err) {
-                answerText = "Failed to query model:\n" + err.toString();
+                obj = err;
+                let message = obj.toString();
+
+                while(obj) {
+                    if(obj?.message) {
+                        message = obj.message;
+                        obj = obj.message;
+                    } else if(obj?.error) {
+                        obj = obj.error;
+                    }
+                    else {
+                        try {
+                            obj = JSON.parse(message);
+                        }
+                        catch { }
+                    }
+                }
+
+                answerText = "Failed to query model: " + message;
             }
 
             // Full answer is here. Insert query and answer (and image) into chat history.
