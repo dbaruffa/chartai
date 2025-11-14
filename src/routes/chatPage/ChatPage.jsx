@@ -26,7 +26,7 @@ const ChatPage = () => {
                             </>
                         )
                     }
-                    <NewPrompt />
+                    <NewPrompt chatList={chatList} setChatList={setChatList} />
                 </div>
             </div>
         </div>

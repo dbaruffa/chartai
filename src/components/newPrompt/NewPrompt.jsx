@@ -4,16 +4,20 @@ import ai from "../../lib/gemini"
 import Markdown from "react-markdown"
 import * as fs from "node:fs";
 import { createPartFromUri, createUserContent } from '@google/genai';
+import { useLocation } from 'react-router-dom';
 
-const NewPrompt = () => {
+const NewPrompt = ({chatList, setChatList}) => {
     const [query, setQuery] = useState("");
     const [answer, setAnswer] = useState("");
     const [localFile, setLocalFile] = useState("");
     const [aiFile, setAiFile] = useState("");
 
+    const path = useLocation().pathname;
+    const chatId = path.split("/").pop();
+
     const endRef = useRef(null)
 
-    const chat = ai.chats.create({
+    const aiChat = ai.chats.create({
         model: "gemini-2.5-flash",
         history: [
             /*{
@@ -45,26 +49,54 @@ const NewPrompt = () => {
     }, [query, answer, localFile]);
 
     const handleQuery = async () => {
-        if(query) {
-            const response = await chat.sendMessageStream({
+        if(query && query.length > 0) {
+            const response = await aiChat.sendMessageStream({
                 message: query,
                 //config:
             });
             
-            console.log("sendMessageStream");
-            console.log(response);
-
-            let answer = "";
+            let answerText = "";
 
             for await (const chunk of response) {
-                console.log("Received chunk: ", chunk.text);
-                answer += chunk.text;
-                setAnswer(answer);
+                answerText += chunk.text;
+                setAnswer(answerText);
             }
 
-            console.log("End of handleQuery");
+            // Full answer is here. Insert query and answer (and image) into chat history.
+            setChatList((chats) => chats.map((chat) => {
+                if(chat.id === chatId) {
+                    return {
+                        ...chat,
+                        history: [
+                            ...chat.history,
+                            {
+                                role: "user",
+                                text: query || "",
+                                imgPath: aiFile,
+                                timestamp: Date.now()
+                            },
+                            {
+                                role: "model",
+                                text: answerText || "",
+                                imgPath: null,
+                                timestamp: Date.now()
+                            }
+                        ]
+                    };
+                }
+                else
+                {
+                    return {
+                        ...chat,
+                        history: [...chat.history]
+                    };
+                }
+            }));
 
-            //setAnswer("I received this query: " + query);
+            setQuery("");
+            setAnswer("");
+            setLocalFile(null);
+            setAiFile(null);
         }
     };
 
@@ -121,8 +153,8 @@ const NewPrompt = () => {
 
     return (
         <>
-            {query && <div className='message user'>{query}</div>}
             {localFile && (<img src={URL.createObjectURL(localFile)} alt="" id="image" />)}
+            {query && <div className='message user'>{query}</div>}
             {answer && <div className='message'><Markdown>{answer}</Markdown></div>}
 
             <div className='endChat' ref={endRef}></div>
