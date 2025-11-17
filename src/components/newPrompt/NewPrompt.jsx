@@ -14,22 +14,14 @@ const NewPrompt = ({chatList, setChatList}) => {
 
     const path = useLocation().pathname;
     const chatId = path.split("/").pop();
+    const myChat = chatList.find(chat => chat.id === chatId);
 
     const endRef = useRef(null);
     const formRef = useRef(null);
 
     const aiChat = ai.chats.create({
         model: "gemini-2.5-flash",
-        history: [
-            /*{
-                role: "user",
-                parts: [{ text: "Hello" }],
-            },
-            {
-                role: "model",
-                parts: [{ text: "Great to meet you. What would you like to know?" }],
-            },*/
-        ],
+        history: myChat? myChat.history.map(({role, text}) => ({role, parts: [{text}]})) : [],
         config: {
             safetySettings: [
                 {
