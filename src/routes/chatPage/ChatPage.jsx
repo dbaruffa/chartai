@@ -4,6 +4,7 @@ import { useNavigate, useOutletContext } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import Markdown from 'react-markdown';
 import { useEffect } from 'react';
+import { MathJaxContext, MathJax} from "better-react-mathjax";
 
 const ChatPage = () => {
     const [chatList, setChatList] = useOutletContext();
@@ -20,25 +21,29 @@ const ChatPage = () => {
     }, [chat]);
 
     return (
-        <div className='chatPage'>
-            <div className="wrapper">
-                <div className="chat">
-                    {
-                        chat?.history?.map((entry, i) =>
-                            <>
-                            {entry.imgPath && (
-                                <img src={entry.imgPath} alt="" id="image" />
-                            )}
-                            <div className={entry.role === "user"? "message user" : "message"} key={i.toString()}>
-                                <Markdown>{entry.text}</Markdown>
-                            </div>
-                            </>
-                        )
-                    }
-                    <NewPrompt chatList={chatList} setChatList={setChatList} />
+        <MathJaxContext>
+            <div className='chatPage'>
+                <div className="wrapper">
+                    <div className="chat">
+                        {
+                            chat?.history?.map((entry, i) =>
+                                <>
+                                {entry.imgPath && (
+                                    <img src={entry.imgPath} alt="" id="image" />
+                                )}
+                                <div className={entry.role === "user"? "message user" : "message"} key={i.toString()}>
+                                    <MathJax dynamic hideUntilTypeset="every">
+                                        <Markdown>{entry.text}</Markdown>
+                                    </MathJax>
+                                </div>
+                                </>
+                            )
+                        }
+                        <NewPrompt chatList={chatList} setChatList={setChatList} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </MathJaxContext>
     )
 }
 
