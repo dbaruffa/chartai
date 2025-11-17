@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import './newPrompt.css'
 import ai from "../../lib/gemini"
 import Markdown from "react-markdown"
-import * as fs from "node:fs";
 import { createPartFromUri, createUserContent } from '@google/genai';
 import { useLocation } from 'react-router-dom';
 
@@ -41,91 +40,114 @@ const NewPrompt = ({chatList, setChatList}) => {
         endRef.current.scrollIntoView()
     }, [query, answer, localFile]);
 
-    const handleQuery = async () => {
-        if(query && query.length > 0) {
-            let answerText = "";
+    const sendQueryToModel = async (text) => {
+        if(!text || text.length <= 0) return;
 
-            try {
-                let message = query;
+        let answerText = "";
 
-                if(aiFile) {
-                    message = createUserContent([
-                        createPartFromUri(aiFile.uri, aiFile.mimeType),
-                        query,
-                    ]);
-                }
+        try {
+            let message = text;
 
-                const response = await aiChat.sendMessageStream({
-                    message: message,
-                    //config:
-                });
-
-                for await (const chunk of response) {
-                    answerText += chunk.text;
-                    setAnswer(answerText);
-                }
-            }
-            catch(err) {
-                obj = err;
-                let message = obj.toString();
-
-                while(obj) {
-                    if(obj?.message) {
-                        message = obj.message;
-                        obj = obj.message;
-                    } else if(obj?.error) {
-                        obj = obj.error;
-                    }
-                    else {
-                        try {
-                            obj = JSON.parse(message);
-                        }
-                        catch { }
-                    }
-                }
-
-                answerText = "Failed to query model: " + message;
+            if(aiFile) {
+                message = createUserContent([
+                    createPartFromUri(aiFile.uri, aiFile.mimeType),
+                    text,
+                ]);
             }
 
-            // Full answer is here. Insert query and answer (and image) into chat history.
-            setChatList((chats) => chats.map((chat) => {
-                if(chat.id === chatId) {
-                    return {
-                        ...chat,
-                        history: [
-                            ...chat.history,
-                            {
+            const response = await aiChat.sendMessageStream({
+                message: message,
+                //config:
+            });
+
+            for await (const chunk of response) {
+                answerText += chunk.text;
+                setAnswer(answerText);
+            }
+        }
+        catch(err) {
+            let obj = err;
+            let message = obj.toString();
+
+            while(obj && obj !== message) {
+                if(obj?.message) {
+                    message = obj.message;
+                    obj = obj.message;
+                } else if(obj?.error) {
+                    obj = obj.error;
+                }
+                else {
+                    try {
+                        obj = JSON.parse(message);
+                    }
+                    catch { }
+                }
+            }
+
+            answerText = "Failed to query model: " + message;
+        }
+
+        // Full answer is here. Insert query and answer (and image) into chat history.
+        setChatList((chats) => chats.map((chat) => {
+            if(chat.id === chatId) {
+                return {
+                    ...chat,
+                    history: [
+                        ...chat.history,
+                        // Optionally insert query if it is there (do not use the parameter "text").
+                        ...(query && query.length > 0? 
+                            [{
                                 role: "user",
                                 text: query || "",
                                 imgPath: localFile,
                                 timestamp: Date.now()
-                            },
-                            {
-                                role: "model",
-                                text: answerText || "",
-                                imgPath: null,
-                                timestamp: Date.now()
-                            }
-                        ]
-                    };
-                }
-                else
-                {
-                    return {
-                        ...chat,
-                        history: [...chat.history]
-                    };
-                }
-            }));
+                            }] : 
+                            []),
+                        {
+                            role: "model",
+                            text: answerText || "",
+                            imgPath: null,
+                            timestamp: Date.now()
+                        }
+                    ]
+                };
+            }
+            else
+            {
+                return {
+                    ...chat,
+                    history: [...chat.history]
+                };
+            }
+        }));
 
-            setQuery("");
-            setAnswer("");
-            setLocalFile(null);
-            setAiFile(null);
+        setQuery("");
+        setAnswer("");
+        setLocalFile(null);
+        setAiFile(null);
+    };
+
+    const handleQuery = async () => {
+        if(query && query.length > 0) {
+            sendQueryToModel(query);
         }
     };
 
     useEffect(() => { handleQuery(); }, [query]);
+
+    // If the chat is newly created (via Dashboard), make sure to send the initial query to the model.
+    // Make sure to only run the function once.
+    const hasSetFirstQuery = useRef(false);
+
+    useEffect(() => {
+        if(!hasSetFirstQuery.current) {
+            if (myChat?.history.length === 1) {
+                sendQueryToModel(myChat.history[0].text);
+            }
+        }
+
+        hasSetFirstQuery.current = true;
+    }, []);
 
     const onTextInput = async (e) => {
         e.preventDefault();
