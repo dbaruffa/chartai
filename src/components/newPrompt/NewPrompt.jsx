@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './newPrompt.css'
-import ai from "../../lib/gemini"
+import { ai, modelConfig } from "../../lib/gemini"
 import Markdown from "react-markdown"
 import { createPartFromUri, createUserContent } from '@google/genai';
 import { useLocation } from 'react-router-dom';
@@ -22,17 +22,7 @@ const NewPrompt = ({chatList, setChatList}) => {
         model: "gemini-2.5-flash",
         history: myChat? myChat.history.map(({role, text}) => ({role, parts: [{text}]})) : [],
         config: {
-            safetySettings: [
-                {
-                    category: "HARM_CATEGORY_HARASSMENT",
-                    threshold: "BLOCK_LOW_AND_ABOVE",
-                },
-                {
-                    category: "HARM_CATEGORY_HATE_SPEECH",
-                    threshold: "BLOCK_LOW_AND_ABOVE",
-                },
-            ],
-            //maxOutputTokens: 200,
+            ...modelConfig
         },
     });
 
