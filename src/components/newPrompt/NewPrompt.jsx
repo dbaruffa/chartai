@@ -67,20 +67,21 @@ const NewPrompt = ({chatList, setChatList}) => {
         }
         catch(err) {
             let obj = err;
-            let message = obj.toString();
+            let message = "";
 
-            while(obj && obj !== message) {
+            while(obj) {
                 if(obj?.message) {
                     message = obj.message;
-                    obj = obj.message;
+
+                    try {
+                        obj = JSON.parse(message);
+                    } catch { break; }
                 } else if(obj?.error) {
                     obj = obj.error;
                 }
                 else {
-                    try {
-                        obj = JSON.parse(message);
-                    }
-                    catch { }
+                    message = obj.toString();
+                    break;
                 }
             }
 
