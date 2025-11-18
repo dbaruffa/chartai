@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { systemPrompt } from "./prompts"
 
 const ai = new GoogleGenAI({apiKey: import.meta.env.VITE_GEMINI_PUBLIC_KEY});
 
@@ -13,6 +14,9 @@ const modelConfig = {
             threshold: "BLOCK_LOW_AND_ABOVE",
         },
     ],
+    ...(systemPrompt != null? {
+        systemInstruction: systemPrompt
+    } : { })
 };
 
 export { ai, modelConfig };
