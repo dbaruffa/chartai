@@ -22,6 +22,8 @@ Remember the Infovis Pricpiples by Edward Tufte:
    * Erase non-data-ink
    * Erase redundant data-ink
 
-Label your data in a meanigful way. Try to infer good labels from the request and variable names, if available.`;
+Label your data in a meanigful way. Try to infer good labels from the request and variable names, if available.
+
+If data is provided, directly use that data. Otherwise create your own example data.`;
 
 export { systemPrompt };
