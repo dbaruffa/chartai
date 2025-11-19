@@ -20,6 +20,8 @@ Remember the Infovis Pricpiples by Edward Tufte:
    * Above all else show the data
    * Maximize the data-ink ratio
    * Erase non-data-ink
-   * Erase redundant data-ink`;
+   * Erase redundant data-ink
+
+Label your data in a meanigful way. Try to infer good labels from the request and variable names, if available.`;
 
 export { systemPrompt };
